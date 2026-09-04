@@ -1,4 +1,4 @@
-package com.abdellahshabat.fatora
+package com.abdellahshabat.fatora.screen1
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,7 +45,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun InvoicesScreen(
     state: InvoicesUiState,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onReportClick: () -> Unit
 ) {
     CompositionLocalProvider(
         LocalLayoutDirection provides LayoutDirection.Rtl
@@ -58,6 +60,15 @@ fun InvoicesScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "رجوع"
+                            )
+                        }
+                    },
+
+                    actions = {
+                        IconButton(onClick = onReportClick) {
+                            Icon(
+                                imageVector = Icons.Default.BarChart,
+                                contentDescription = "كشف المبيعات"
                             )
                         }
                     }

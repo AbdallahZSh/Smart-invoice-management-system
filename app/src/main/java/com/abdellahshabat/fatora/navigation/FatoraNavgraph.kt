@@ -11,8 +11,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.abdellahshabat.fatora.AddDebtScreen
 import com.abdellahshabat.fatora.HomeScreen
-import com.abdellahshabat.fatora.InvoicesScreen
+import com.abdellahshabat.fatora.screen1.InvoicesScreen
 import com.abdellahshabat.fatora.di.AppContainer
+import com.abdellahshabat.fatora.screen2.SalesReportScreen
+import com.abdellahshabat.fatora.screen2.SalesReportViewModel
+import com.abdellahshabat.fatora.screen2.SalesReportViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.AddDebtViewModel
 import com.abdellahshabat.fatora.viewmodel.AddDebtViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.HomeViewModel
@@ -25,6 +28,7 @@ object FatoraRoutes {
     const val HOME = "home"
     const val ADD_DEBT = "add_debt"
     const val INVOICES = "invoices"
+    const val SALES_REPORT = "sales_report"
 
     // لاحقاً:
     // const val CLARIFICATION = "clarification"
@@ -95,6 +99,31 @@ fun FatoraNavGraph(
 
             InvoicesScreen(
                 state = uiState,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onReportClick = {
+                    navController.navigate(FatoraRoutes.SALES_REPORT)
+                }
+            )
+        }
+
+        composable(FatoraRoutes.SALES_REPORT) {
+            val viewModel: SalesReportViewModel = viewModel(
+                factory = SalesReportViewModelFactory(
+                    customerRepository = appContainer.customerRepository,
+                    transactionRepository = appContainer.transactionRepository
+                )
+            )
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            SalesReportScreen(
+                state = uiState,
+                onFilterModeChange = viewModel::onFilterModeChange,
+                onTypeFilterChange = viewModel::onTypeFilterChange,
+                onPreviousClick = viewModel::onPreviousClick,
+                onNextClick = viewModel::onNextClick,
                 onBackClick = {
                     navController.popBackStack()
                 }

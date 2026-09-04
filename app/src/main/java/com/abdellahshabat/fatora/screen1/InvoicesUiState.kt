@@ -1,4 +1,4 @@
-package com.abdellahshabat.fatora
+package com.abdellahshabat.fatora.screen1
 
 /**
  * حالة شاشة قائمة الفواتير. كل بطاقة تمثل عملية واحدة، لكن معها

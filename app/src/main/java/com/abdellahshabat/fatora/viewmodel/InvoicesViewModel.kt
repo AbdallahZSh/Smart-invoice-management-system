@@ -3,8 +3,8 @@ package com.abdellahshabat.fatora.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.abdellahshabat.fatora.InvoiceCardUi
-import com.abdellahshabat.fatora.InvoicesUiState
+import com.abdellahshabat.fatora.screen1.InvoiceCardUi
+import com.abdellahshabat.fatora.screen1.InvoicesUiState
 import com.abdellahshabat.fatora.data.database.entity.TransactionType
 import com.abdellahshabat.fatora.data.repository.CustomerRepository
 import com.abdellahshabat.fatora.data.repository.TransactionRepository
