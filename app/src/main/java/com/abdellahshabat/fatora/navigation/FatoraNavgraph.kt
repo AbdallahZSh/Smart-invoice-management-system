@@ -11,16 +11,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.abdellahshabat.fatora.AddDebtScreen
 import com.abdellahshabat.fatora.HomeScreen
+import com.abdellahshabat.fatora.InvoicesScreen
 import com.abdellahshabat.fatora.di.AppContainer
 import com.abdellahshabat.fatora.viewmodel.AddDebtViewModel
 import com.abdellahshabat.fatora.viewmodel.AddDebtViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.HomeViewModel
 import com.abdellahshabat.fatora.viewmodel.HomeViewModelFactory
+import com.abdellahshabat.fatora.viewmodel.InvoicesViewModel
+import com.abdellahshabat.fatora.viewmodel.InvoicesViewModelFactory
 
 /** أسماء المسارات (Routes) - مكان واحد بس عشان نتفادى أخطاء كتابة الأسماء يدوياً. */
 object FatoraRoutes {
     const val HOME = "home"
     const val ADD_DEBT = "add_debt"
+    const val INVOICES = "invoices"
+
     // لاحقاً:
     // const val CLARIFICATION = "clarification"
 }
@@ -67,8 +72,32 @@ fun FatoraNavGraph(
                 },
                 onProfileClick = { /* TODO */ },
                 onCustomersClick = { /* TODO */ },
-                onTransactionsClick = { /* TODO */ },
+                onTransactionsClick = { navController.navigate(FatoraRoutes.INVOICES) },
                 onSettingsClick = { /* TODO */ }
+            )
+        }
+
+        composable(FatoraRoutes.INVOICES) {
+            val viewModel: InvoicesViewModel = viewModel(
+                factory = InvoicesViewModelFactory(
+                    customerRepository = appContainer.customerRepository,
+                    transactionRepository = appContainer.transactionRepository
+                )
+            )
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            // نعيد التحميل كل مرة الشاشة تنفتح، عشان أي عملية جديدة
+            // انضافت من شاشة تانية تظهر فوراً هون كمان.
+            LaunchedEffect(Unit) {
+                viewModel.loadInvoices()
+            }
+
+            InvoicesScreen(
+                state = uiState,
+                onBackClick = {
+                    navController.popBackStack()
+                }
             )
         }
 
