@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.abdellahshabat.fatora.data.database.converter.Converters
 import com.abdellahshabat.fatora.data.database.dao.CustomerDao
 import com.abdellahshabat.fatora.data.database.dao.TransactionDao
 import com.abdellahshabat.fatora.data.database.entity.Customer
@@ -17,6 +19,8 @@ import com.abdellahshabat.fatora.data.database.entity.Transaction
     version = 1,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
+
 abstract class FatoraDatabase : RoomDatabase() {
 
     abstract fun customerDao(): CustomerDao
@@ -34,7 +38,7 @@ abstract class FatoraDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     FatoraDatabase::class.java,
-                    "shopbook_database"
+                    "fatora_database"
                 ).build()
 
                 INSTANCE = instance
