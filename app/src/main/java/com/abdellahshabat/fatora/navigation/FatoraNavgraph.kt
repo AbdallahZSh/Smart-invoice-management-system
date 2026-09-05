@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.abdellahshabat.fatora.AddDebtScreen
+import com.abdellahshabat.fatora.AddPaymentScreen
 import com.abdellahshabat.fatora.HomeScreen
 import com.abdellahshabat.fatora.QueryResponseScreen
 import com.abdellahshabat.fatora.customer.CustomersScreen
@@ -24,6 +25,8 @@ import com.abdellahshabat.fatora.screen2.SalesReportViewModel
 import com.abdellahshabat.fatora.screen2.SalesReportViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.AddDebtViewModel
 import com.abdellahshabat.fatora.viewmodel.AddDebtViewModelFactory
+import com.abdellahshabat.fatora.viewmodel.AddPaymentViewModel
+import com.abdellahshabat.fatora.viewmodel.AddPaymentViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.CustomerDetailViewModel
 import com.abdellahshabat.fatora.viewmodel.CustomerDetailViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.CustomersViewModel
@@ -41,7 +44,7 @@ object FatoraRoutes {
     const val SALES_REPORT = "sales_report"
     const val CUSTOMERS = "customers"
     const val CUSTOMER_DETAIL = "customer_detail/{customerId}"
-
+    const val ADD_PAYMENT = "add_payment"
     fun customerDetail(customerId: String) = "customer_detail/$customerId"
 
     // لاحقاً:
@@ -96,10 +99,33 @@ fun FatoraNavGraph(
                 onSettingsClick = { /* TODO */ },
                 onViewAllTransactionsClick = {                    // ← جديد
                     navController.navigate(FatoraRoutes.INVOICES)
+
                 }
             )
         }
+        composable(FatoraRoutes.ADD_PAYMENT) {
+            val viewModel: AddPaymentViewModel = viewModel(
+                factory = AddPaymentViewModelFactory(
+                    addPaymentUseCase = appContainer.addPaymentUseCase
+                )
+            )
 
+            val uiState by viewModel.uiState.collectAsState()
+
+            AddPaymentScreen(
+                state = uiState,
+                onCustomerNameChange = viewModel::onCustomerNameChange,
+                onAmountChange = viewModel::onAmountChange,
+                onSaveClick = viewModel::save,
+                onSaveSuccess = { navController.popBackStack() },
+                onBackClick = { navController.popBackStack() },
+                onSwitchToDebtClick = {
+                    navController.navigate(FatoraRoutes.ADD_DEBT) {
+                        popUpTo(FatoraRoutes.ADD_PAYMENT) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(FatoraRoutes.CUSTOMERS) {
             val viewModel: CustomersViewModel = viewModel(
                 factory = CustomersViewModelFactory(
@@ -239,6 +265,11 @@ fun FatoraNavGraph(
                 },
                 onBackClick = {
                     navController.popBackStack()
+                },
+                onSwitchToPaymentClick = {
+                    navController.navigate(FatoraRoutes.ADD_PAYMENT) {
+                        popUpTo(FatoraRoutes.ADD_DEBT) { inclusive = true }
+                    }
                 }
             )
         }

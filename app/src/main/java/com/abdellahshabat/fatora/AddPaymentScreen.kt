@@ -29,27 +29,24 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /**
- * شاشة إضافة دين - نسخة بسيطة بالنص فقط (بدون صوت أو AI بعد).
- * الهدف الوحيد منها هلق: التأكد إنه AddDebtUseCase شغال فعلياً
- * من واجهة حقيقية، قبل ما نضيف طبقة الصوت/AI فوقها.
+ * شاشة تسجيل دفعة - نسخة طبق الأصل من AddDebtScreen، بدون حقل المنتج
+ * (الدفعة ما إلها منتج مرتبط فيها).
  *
  * @param onSaveSuccess يُستدعى مرة وحدة بعد نجاح الحفظ (للرجوع لـ Home مثلاً)
- * @param onBackClick يُستدعى عند الضغط على زر الرجوع بالـ AppBar
+ * @param onSwitchToDebtClick يُستدعى لو المستخدم بدو يبدّل لشاشة "إضافة دين" بدالها
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddDebtScreen(
-    state: AddDebtUiState,
+fun AddPaymentScreen(
+    state: AddPaymentUiState,
     onCustomerNameChange: (String) -> Unit,
-    onProductChange: (String) -> Unit,
     onAmountChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onSaveSuccess: () -> Unit,
     onBackClick: () -> Unit,
-    onSwitchToPaymentClick: () -> Unit
+    onSwitchToDebtClick: () -> Unit
 ) {
 
-    // بمجرد ما ينجح الحفظ، نرجع تلقائياً - بدون ما المستخدم يضغط شي إضافي.
     LaunchedEffect(state.saveSuccess) {
         if (state.saveSuccess) {
             onSaveSuccess()
@@ -63,7 +60,7 @@ fun AddDebtScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("إضافة دين") },
+                    title = { Text("تسجيل دفعة") },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
                             Icon(
@@ -73,10 +70,10 @@ fun AddDebtScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = onSwitchToPaymentClick) {
+                        IconButton(onClick = onSwitchToDebtClick) {
                             Icon(
                                 imageVector = Icons.Filled.SwapHoriz,
-                                contentDescription = "التبديل لتسجيل دفعة"
+                                contentDescription = "التبديل لإضافة دين"
                             )
                         }
                     }
@@ -95,16 +92,6 @@ fun AddDebtScreen(
                     value = state.customerName,
                     onValueChange = onCustomerNameChange,
                     label = { Text("اسم العميل") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = state.product,
-                    onValueChange = onProductChange,
-                    label = { Text("المنتج (اختياري)") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -144,7 +131,7 @@ fun AddDebtScreen(
                             color = Color.White
                         )
                     } else {
-                        Text("حفظ الدين")
+                        Text("حفظ الدفعة")
                     }
                 }
             }

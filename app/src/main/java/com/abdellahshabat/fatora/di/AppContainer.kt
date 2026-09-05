@@ -5,6 +5,7 @@ import com.abdellahshabat.fatora.data.database.FatoraDatabase
 import com.abdellahshabat.fatora.data.repository.CustomerRepository
 import com.abdellahshabat.fatora.data.repository.TransactionRepository
 import com.abdellahshabat.fatora.domain.usecase.AddDebtUseCase
+import com.abdellahshabat.fatora.domain.usecase.AddPaymentUseCase
 
 /**
  * حاوية بسيطة للـ Dependency Injection اليدوي (بدون Hilt/Koin بمرحلة الـ MVP).
@@ -26,4 +27,7 @@ class AppContainer(context: Context) {
 
     val addDebtUseCase: AddDebtUseCase =
         AddDebtUseCase(customerRepository, transactionRepository)
+
+    val addPaymentUseCase: AddPaymentUseCase =
+        AddPaymentUseCase(customerRepository, transactionRepository)
 }
