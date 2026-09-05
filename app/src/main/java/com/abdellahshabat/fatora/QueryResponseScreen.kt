@@ -90,7 +90,7 @@ data class QueryResponseUiState(
 @Composable
 fun QueryResponseScreen(
     state: QueryResponseUiState,
-    onViewFullHistory: () -> Unit,
+    onExportPdfClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -249,7 +249,7 @@ fun QueryResponseScreen(
         if (state.recentTransactions.isNotEmpty()) {
 
             Text(
-                text = "آخر ${state.recentTransactions.size} عمليات مع ${state.customerName}",
+                text = "كل العمليات مع ${state.customerName} (${state.recentTransactions.size})",
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -302,36 +302,31 @@ fun QueryResponseScreen(
                 }
             }
 
-            Spacer(
-                modifier = Modifier.height(14.dp)
-            )
+            // ------------------------------------------------
+            // زر عرض السجل الكامل
+            // ------------------------------------------------
+
+            OutlinedButton(
+                onClick = onExportPdfClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Icon(
+                    imageVector = Icons.Filled.Description,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+
+                Spacer(
+                    modifier = Modifier.size(8.dp)
+                )
+
+                Text(
+                    text = "تحميل PDF"
+                )
+            }
         }
-
-        // ------------------------------------------------
-        // زر عرض السجل الكامل
-        // ------------------------------------------------
-
-        OutlinedButton(
-            onClick = onViewFullHistory,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-
-            Icon(
-                imageVector = Icons.Filled.Description,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp)
-            )
-
-            Spacer(
-                modifier = Modifier.size(8.dp)
-            )
-
-            Text(
-                text = "عرض كل السجل"
-            )
-        }
-    }
-}
+    }}
 
 /**
  * تجهيز المبلغ مع + أو -

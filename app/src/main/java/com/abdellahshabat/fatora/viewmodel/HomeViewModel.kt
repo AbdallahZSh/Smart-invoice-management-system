@@ -62,7 +62,7 @@ class HomeViewModel(
 
             val recentTransactions = transactions
                 .sortedByDescending { it.createdAt }
-                .take(5)
+                .take(2)  //number of last process in home and between button all
                 .map { transaction ->
                     RecentTransactionUi(
                         customerName = customerNameById[transaction.customerId] ?: "عميل محذوف",
