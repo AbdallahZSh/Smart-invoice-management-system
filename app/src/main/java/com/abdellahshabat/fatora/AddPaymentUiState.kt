@@ -8,7 +8,8 @@ data class AddPaymentUiState(
     val amountText: String = "",
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
-    val saveSuccess: Boolean = false
+    val saveSuccess: Boolean = false,
+    val clarification: ClarificationUiState? = null
 ) {
     val isSaveEnabled: Boolean
         get() = customerName.isNotBlank() &&

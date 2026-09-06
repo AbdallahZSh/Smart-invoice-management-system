@@ -1,11 +1,11 @@
 package com.abdellahshabat.fatora.navigation
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -15,11 +15,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.abdellahshabat.fatora.AddDebtScreen
 import com.abdellahshabat.fatora.AddPaymentScreen
+import com.abdellahshabat.fatora.ClarificationScreen
 import com.abdellahshabat.fatora.HomeScreen
 import com.abdellahshabat.fatora.QueryResponseScreen
 import com.abdellahshabat.fatora.customer.CustomersScreen
-import com.abdellahshabat.fatora.screen1.InvoicesScreen
 import com.abdellahshabat.fatora.di.AppContainer
+import com.abdellahshabat.fatora.screen1.InvoicesScreen
 import com.abdellahshabat.fatora.screen2.SalesReportScreen
 import com.abdellahshabat.fatora.screen2.SalesReportViewModel
 import com.abdellahshabat.fatora.screen2.SalesReportViewModelFactory
@@ -40,15 +41,13 @@ import com.abdellahshabat.fatora.viewmodel.InvoicesViewModelFactory
 object FatoraRoutes {
     const val HOME = "home"
     const val ADD_DEBT = "add_debt"
+    const val ADD_PAYMENT = "add_payment"
     const val INVOICES = "invoices"
     const val SALES_REPORT = "sales_report"
     const val CUSTOMERS = "customers"
     const val CUSTOMER_DETAIL = "customer_detail/{customerId}"
-    const val ADD_PAYMENT = "add_payment"
-    fun customerDetail(customerId: String) = "customer_detail/$customerId"
 
-    // لاحقاً:
-    // const val CLARIFICATION = "clarification"
+    fun customerDetail(customerId: String) = "customer_detail/$customerId"
 }
 
 /**
@@ -95,37 +94,16 @@ fun FatoraNavGraph(
                 onCustomersClick = {
                     navController.navigate(FatoraRoutes.CUSTOMERS)
                 },
-                onTransactionsClick = { navController.navigate(FatoraRoutes.INVOICES) },
-                onSettingsClick = { /* TODO */ },
-                onViewAllTransactionsClick = {                    // ← جديد
+                onTransactionsClick = {
                     navController.navigate(FatoraRoutes.INVOICES)
-
+                },
+                onSettingsClick = { /* TODO */ },
+                onViewAllTransactionsClick = {
+                    navController.navigate(FatoraRoutes.INVOICES)
                 }
             )
         }
-        composable(FatoraRoutes.ADD_PAYMENT) {
-            val viewModel: AddPaymentViewModel = viewModel(
-                factory = AddPaymentViewModelFactory(
-                    addPaymentUseCase = appContainer.addPaymentUseCase
-                )
-            )
 
-            val uiState by viewModel.uiState.collectAsState()
-
-            AddPaymentScreen(
-                state = uiState,
-                onCustomerNameChange = viewModel::onCustomerNameChange,
-                onAmountChange = viewModel::onAmountChange,
-                onSaveClick = viewModel::save,
-                onSaveSuccess = { navController.popBackStack() },
-                onBackClick = { navController.popBackStack() },
-                onSwitchToDebtClick = {
-                    navController.navigate(FatoraRoutes.ADD_DEBT) {
-                        popUpTo(FatoraRoutes.ADD_PAYMENT) { inclusive = true }
-                    }
-                }
-            )
-        }
         composable(FatoraRoutes.CUSTOMERS) {
             val viewModel: CustomersViewModel = viewModel(
                 factory = CustomersViewModelFactory(
@@ -150,7 +128,6 @@ fun FatoraNavGraph(
                 }
             )
         }
-
 
         composable(
             route = FatoraRoutes.CUSTOMER_DETAIL,
@@ -192,7 +169,6 @@ fun FatoraNavGraph(
                 )
             }
         }
-
 
         composable(FatoraRoutes.INVOICES) {
             val viewModel: InvoicesViewModel = viewModel(
@@ -252,26 +228,76 @@ fun FatoraNavGraph(
 
             val uiState by viewModel.uiState.collectAsState()
 
-            AddDebtScreen(
-                state = uiState,
-                onCustomerNameChange = viewModel::onCustomerNameChange,
-                onProductChange = viewModel::onProductChange,
-                onAmountChange = viewModel::onAmountChange,
-                onSaveClick = viewModel::save,
-                onSaveSuccess = {
-                    // نرجع لـ Home ونشيل ADD_DEBT من الـ back stack
-                    // عشان لو ضغط المستخدم "رجوع" من الـ Home ما يرجعله عالشاشة القديمة.
-                    navController.popBackStack()
-                },
-                onBackClick = {
-                    navController.popBackStack()
-                },
-                onSwitchToPaymentClick = {
-                    navController.navigate(FatoraRoutes.ADD_PAYMENT) {
-                        popUpTo(FatoraRoutes.ADD_DEBT) { inclusive = true }
+            val clarification = uiState.clarification
+            if (clarification != null) {
+                ClarificationScreen(
+                    state = clarification,
+                    onMissingFieldChange = { /* ما في حقل ناقص بهاي الحالة */ },
+                    onCustomerSelected = viewModel::onClarificationCustomerSelected,
+                    onContinue = viewModel::onClarificationContinue
+                )
+            } else {
+                AddDebtScreen(
+                    state = uiState,
+                    onCustomerNameChange = viewModel::onCustomerNameChange,
+                    onProductChange = viewModel::onProductChange,
+                    onAmountChange = viewModel::onAmountChange,
+                    onSaveClick = viewModel::save,
+                    onSaveSuccess = {
+                        // نرجع لـ Home ونشيل ADD_DEBT من الـ back stack
+                        // عشان لو ضغط المستخدم "رجوع" من الـ Home ما يرجعله عالشاشة القديمة.
+                        navController.popBackStack()
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onSwitchToPaymentClick = {
+                        // نستبدل بدل ما نضيف فوق - عشان الـ back stack ما يصير فيه
+                        // AddDebt و AddPayment مع بعض بنفس الوقت.
+                        navController.navigate(FatoraRoutes.ADD_PAYMENT) {
+                            popUpTo(FatoraRoutes.ADD_DEBT) { inclusive = true }
+                        }
                     }
-                }
+                )
+            }
+        }
+
+        composable(FatoraRoutes.ADD_PAYMENT) {
+            val viewModel: AddPaymentViewModel = viewModel(
+                factory = AddPaymentViewModelFactory(
+                    addPaymentUseCase = appContainer.addPaymentUseCase
+                )
             )
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            val clarification = uiState.clarification
+            if (clarification != null) {
+                ClarificationScreen(
+                    state = clarification,
+                    onMissingFieldChange = { /* ما في حقل ناقص بهاي الحالة */ },
+                    onCustomerSelected = viewModel::onClarificationCustomerSelected,
+                    onContinue = viewModel::onClarificationContinue
+                )
+            } else {
+                AddPaymentScreen(
+                    state = uiState,
+                    onCustomerNameChange = viewModel::onCustomerNameChange,
+                    onAmountChange = viewModel::onAmountChange,
+                    onSaveClick = viewModel::save,
+                    onSaveSuccess = {
+                        navController.popBackStack()
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onSwitchToDebtClick = {
+                        navController.navigate(FatoraRoutes.ADD_DEBT) {
+                            popUpTo(FatoraRoutes.ADD_PAYMENT) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }

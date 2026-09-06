@@ -29,6 +29,10 @@ class CustomerRepository(
         return customerDao.searchCustomers(name)
     }
 
+    suspend fun findCustomersByExactName(name: String): List<Customer> {
+        return customerDao.getCustomersByExactName(name)
+    }
+
     suspend fun getCustomerById(id: String): Customer? {
         return customerDao.getCustomerById(id)
     }

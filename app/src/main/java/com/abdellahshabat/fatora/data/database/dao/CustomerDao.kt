@@ -17,6 +17,9 @@ interface CustomerDao {
     @Query("SELECT * FROM customers WHERE name LIKE '%' || :name || '%'")
     suspend fun searchCustomers(name: String): List<Customer>
 
+    @Query("SELECT * FROM customers WHERE name = :name COLLATE NOCASE")
+    suspend fun getCustomersByExactName(name: String): List<Customer>
+
     @Query("SELECT * FROM customers ORDER BY createdAt DESC")
     suspend fun getAllCustomers(): List<Customer>
 }
