@@ -1,11 +1,13 @@
 package com.abdellahshabat.fatora.navigation
 
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import android.widget.Toast
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -15,19 +17,30 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.abdellahshabat.fatora.AddDebtScreen
 import com.abdellahshabat.fatora.AddPaymentScreen
+import com.abdellahshabat.fatora.AppearanceScreen
+import com.abdellahshabat.fatora.BackupScreen
 import com.abdellahshabat.fatora.ClarificationScreen
+import com.abdellahshabat.fatora.ComingSoonScreen
+import com.abdellahshabat.fatora.HelpFeedbackScreen
 import com.abdellahshabat.fatora.HomeScreen
+import com.abdellahshabat.fatora.InvoicesScreen
+import com.abdellahshabat.fatora.ListsScreen
 import com.abdellahshabat.fatora.QueryResponseScreen
+import com.abdellahshabat.fatora.SettingsScreen
+import com.abdellahshabat.fatora.StorageDataScreen
 import com.abdellahshabat.fatora.customer.CustomersScreen
 import com.abdellahshabat.fatora.di.AppContainer
-import com.abdellahshabat.fatora.screen1.InvoicesScreen
 import com.abdellahshabat.fatora.screen2.SalesReportScreen
 import com.abdellahshabat.fatora.screen2.SalesReportViewModel
 import com.abdellahshabat.fatora.screen2.SalesReportViewModelFactory
+import com.abdellahshabat.fatora.util.ShopPreferences
+import com.abdellahshabat.fatora.util.ThemeMode
 import com.abdellahshabat.fatora.viewmodel.AddDebtViewModel
 import com.abdellahshabat.fatora.viewmodel.AddDebtViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.AddPaymentViewModel
 import com.abdellahshabat.fatora.viewmodel.AddPaymentViewModelFactory
+import com.abdellahshabat.fatora.viewmodel.BackupViewModel
+import com.abdellahshabat.fatora.viewmodel.BackupViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.CustomerDetailViewModel
 import com.abdellahshabat.fatora.viewmodel.CustomerDetailViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.CustomersViewModel
@@ -36,6 +49,10 @@ import com.abdellahshabat.fatora.viewmodel.HomeViewModel
 import com.abdellahshabat.fatora.viewmodel.HomeViewModelFactory
 import com.abdellahshabat.fatora.viewmodel.InvoicesViewModel
 import com.abdellahshabat.fatora.viewmodel.InvoicesViewModelFactory
+import com.abdellahshabat.fatora.viewmodel.SettingsViewModel
+import com.abdellahshabat.fatora.viewmodel.SettingsViewModelFactory
+import com.abdellahshabat.fatora.viewmodel.StorageDataViewModel
+import com.abdellahshabat.fatora.viewmodel.StorageDataViewModelFactory
 
 /** أسماء المسارات (Routes) - مكان واحد بس عشان نتفادى أخطاء كتابة الأسماء يدوياً. */
 object FatoraRoutes {
@@ -46,6 +63,16 @@ object FatoraRoutes {
     const val SALES_REPORT = "sales_report"
     const val CUSTOMERS = "customers"
     const val CUSTOMER_DETAIL = "customer_detail/{customerId}"
+    const val SETTINGS = "settings"
+    const val LISTS = "lists"
+    const val BACKUP = "backup"
+    const val STORAGE_DATA = "storage_data"
+    const val APPEARANCE = "appearance"
+    const val HELP = "help"
+    const val ACCOUNT_STUB = "account_stub"
+    const val PRIVACY_STUB = "privacy_stub"
+    const val NOTIFICATIONS_STUB = "notifications_stub"
+    const val LANGUAGE_STUB = "language_stub"
 
     fun customerDetail(customerId: String) = "customer_detail/$customerId"
 }
@@ -53,15 +80,14 @@ object FatoraRoutes {
 /**
  * نقطة الدخول الوحيدة للتنقل بالتطبيق.
  *
- * HOME: قراءة فقط - بيعرض بيانات حقيقية من Room عبر HomeViewModel.
- * ADD_DEBT: أول شاشة كتابة فعلية - بتحفظ عملية حقيقية عبر AddDebtUseCase.
- *
- * ClarificationScreen وQueryResponseScreen ما انضافوا هون لسا لأنهم
- * بيحتاجوا طبقة الصوت/AI الجاية عشان يكون عندهم بيانات حقيقية يتغذوا منها.
+ * themeMode / onThemeModeChange: ممرّرين من MainActivity عشان شاشة "الشكل"
+ * تقدر تغيّر الـ Theme فوراً وتحفظ الاختيار.
  */
 @Composable
 fun FatoraNavGraph(
     appContainer: AppContainer,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
@@ -78,8 +104,6 @@ fun FatoraNavGraph(
 
             val uiState by viewModel.uiState.collectAsState()
 
-            // نعيد تحميل البيانات كل مرة الشاشة ترجع تظهر (مثلاً بعد حفظ دين جديد)،
-            // لأنه الـ ViewModel نفسه بيضل عايش بالـ back stack وما بيعيد init{} لحاله.
             LaunchedEffect(Unit) {
                 viewModel.loadHomeData()
             }
@@ -97,7 +121,9 @@ fun FatoraNavGraph(
                 onTransactionsClick = {
                     navController.navigate(FatoraRoutes.INVOICES)
                 },
-                onSettingsClick = { /* TODO */ },
+                onSettingsClick = {
+                    navController.navigate(FatoraRoutes.SETTINGS)
+                },
                 onViewAllTransactionsClick = {
                     navController.navigate(FatoraRoutes.INVOICES)
                 }
@@ -122,6 +148,9 @@ fun FatoraNavGraph(
                 state = uiState,
                 onCustomerClick = { customerId ->
                     navController.navigate(FatoraRoutes.customerDetail(customerId))
+                },
+                onDeleteCustomer = { customerId ->
+                    viewModel.deleteCustomer(customerId)
                 },
                 onBackClick = {
                     navController.popBackStack()
@@ -180,8 +209,6 @@ fun FatoraNavGraph(
 
             val uiState by viewModel.uiState.collectAsState()
 
-            // نعيد التحميل كل مرة الشاشة تنفتح، عشان أي عملية جديدة
-            // انضافت من شاشة تانية تظهر فوراً هون كمان.
             LaunchedEffect(Unit) {
                 viewModel.loadInvoices()
             }
@@ -193,6 +220,12 @@ fun FatoraNavGraph(
                 },
                 onReportClick = {
                     navController.navigate(FatoraRoutes.SALES_REPORT)
+                },
+                onDeleteInvoice = { transactionId ->
+                    viewModel.deleteInvoice(transactionId)
+                },
+                onEditInvoice = { transactionId, product, amount ->
+                    viewModel.updateInvoice(transactionId, product, amount)
                 }
             )
         }
@@ -244,16 +277,12 @@ fun FatoraNavGraph(
                     onAmountChange = viewModel::onAmountChange,
                     onSaveClick = viewModel::save,
                     onSaveSuccess = {
-                        // نرجع لـ Home ونشيل ADD_DEBT من الـ back stack
-                        // عشان لو ضغط المستخدم "رجوع" من الـ Home ما يرجعله عالشاشة القديمة.
                         navController.popBackStack()
                     },
                     onBackClick = {
                         navController.popBackStack()
                     },
                     onSwitchToPaymentClick = {
-                        // نستبدل بدل ما نضيف فوق - عشان الـ back stack ما يصير فيه
-                        // AddDebt و AddPayment مع بعض بنفس الوقت.
                         navController.navigate(FatoraRoutes.ADD_PAYMENT) {
                             popUpTo(FatoraRoutes.ADD_DEBT) { inclusive = true }
                         }
@@ -298,6 +327,145 @@ fun FatoraNavGraph(
                     }
                 )
             }
+        }
+
+        composable(FatoraRoutes.SETTINGS) {
+            val context = LocalContext.current
+            val shopPreferences = remember { ShopPreferences(context) }
+
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(
+                    shopPreferences = shopPreferences,
+                    customerRepository = appContainer.customerRepository,
+                    transactionRepository = appContainer.transactionRepository
+                )
+            )
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.load()
+            }
+
+            SettingsScreen(
+                state = uiState,
+                onShopNameChange = viewModel::onShopNameChange,
+                onOwnerPhoneChange = viewModel::onOwnerPhoneChange,
+                onSaveClick = viewModel::saveProfile,
+                onOpenLists = { navController.navigate(FatoraRoutes.LISTS) },
+                onOpenBackup = { navController.navigate(FatoraRoutes.BACKUP) },
+                onOpenStorage = { navController.navigate(FatoraRoutes.STORAGE_DATA) },
+                onOpenAppearance = { navController.navigate(FatoraRoutes.APPEARANCE) },
+                onOpenHelp = { navController.navigate(FatoraRoutes.HELP) },
+                onOpenAccount = { navController.navigate(FatoraRoutes.ACCOUNT_STUB) },
+                onOpenPrivacy = { navController.navigate(FatoraRoutes.PRIVACY_STUB) },
+                onOpenNotifications = { navController.navigate(FatoraRoutes.NOTIFICATIONS_STUB) },
+                onOpenLanguage = { navController.navigate(FatoraRoutes.LANGUAGE_STUB) },
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(FatoraRoutes.LISTS) {
+            ListsScreen(
+                onOpenCustomersClick = { navController.navigate(FatoraRoutes.CUSTOMERS) },
+                onOpenInvoicesClick = { navController.navigate(FatoraRoutes.INVOICES) },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(FatoraRoutes.BACKUP) {
+            val context = LocalContext.current
+
+            val viewModel: BackupViewModel = viewModel(
+                factory = BackupViewModelFactory(
+                    customerRepository = appContainer.customerRepository,
+                    transactionRepository = appContainer.transactionRepository
+                )
+            )
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.loadCounts()
+            }
+
+            BackupScreen(
+                state = uiState,
+                onExportClick = { viewModel.exportBackup(context) },
+                onImportFileSelected = { uri: Uri -> viewModel.importBackup(context, uri) },
+                onOpenInvoicesClick = { navController.navigate(FatoraRoutes.INVOICES) },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(FatoraRoutes.STORAGE_DATA) {
+            val viewModel: StorageDataViewModel = viewModel(
+                factory = StorageDataViewModelFactory(
+                    customerRepository = appContainer.customerRepository,
+                    transactionRepository = appContainer.transactionRepository
+                )
+            )
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            LaunchedEffect(Unit) {
+                viewModel.load()
+            }
+
+            StorageDataScreen(
+                state = uiState,
+                onOpenBackupClick = { navController.navigate(FatoraRoutes.BACKUP) },
+                onResetAllData = { viewModel.resetAllData() },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(FatoraRoutes.APPEARANCE) {
+            AppearanceScreen(
+                currentThemeMode = themeMode,
+                onThemeModeChange = onThemeModeChange,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(FatoraRoutes.HELP) {
+            HelpFeedbackScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(FatoraRoutes.ACCOUNT_STUB) {
+            ComingSoonScreen(
+                title = "الحساب",
+                explanation = "إشعارات الأمان بتحتاج نظام حسابات/تسجيل دخول، وهاد مش موجود بالتطبيق لسا.",
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(FatoraRoutes.PRIVACY_STUB) {
+            ComingSoonScreen(
+                title = "الخصوصية",
+                explanation = "ميزة حجب عميل بتحتاج تعديل بجدول العملاء بقاعدة البيانات - رح نضيفها بعناية بمرة جاية.",
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(FatoraRoutes.NOTIFICATIONS_STUB) {
+            ComingSoonScreen(
+                title = "الإشعارات",
+                explanation = "تذكيرات الديون بتحتاج صلاحيات إشعارات وجدولة - شغل منفصل جاي.",
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(FatoraRoutes.LANGUAGE_STUB) {
+            ComingSoonScreen(
+                title = "لغة التطبيق",
+                explanation = "كل نصوص التطبيق مكتوبة عربي مباشر بالكود - تغيير اللغة يحتاج نقلها لملفات strings.xml أول.",
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

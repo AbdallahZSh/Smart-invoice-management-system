@@ -25,4 +25,13 @@ interface TransactionDao {
         ORDER BY createdAt DESC
     """)
     suspend fun getAllTransactions(): List<Transaction>
+
+    @Query("DELETE FROM transactions WHERE id = :transactionId")
+    suspend fun deleteTransactionById(transactionId: String)
+
+    @Query("DELETE FROM transactions WHERE customerId = :customerId")
+    suspend fun deleteTransactionsByCustomerId(customerId: String)
+
+    @Query("UPDATE transactions SET product = :product, amount = :amount WHERE id = :transactionId")
+    suspend fun updateTransaction(transactionId: String, product: String?, amount: Double)
 }

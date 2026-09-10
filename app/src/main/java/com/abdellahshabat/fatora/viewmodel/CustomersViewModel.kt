@@ -66,6 +66,15 @@ class CustomersViewModel(
             )
         }
     }
+
+    /** يحذف العميل وكل عملياته المسجلة معاً (حذف تبعي)، ويحدث القائمة فوراً. */
+    fun deleteCustomer(customerId: String) {
+        viewModelScope.launch {
+            transactionRepository.deleteTransactionsForCustomer(customerId)
+            customerRepository.deleteCustomer(customerId)
+            loadCustomers()
+        }
+    }
 }
 
 class CustomersViewModelFactory(

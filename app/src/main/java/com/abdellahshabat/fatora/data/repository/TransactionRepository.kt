@@ -59,4 +59,24 @@ class TransactionRepository(
     suspend fun getAllTransactions(): List<Transaction> {
         return transactionDao.getAllTransactions()
     }
+
+    /** حذف عملية واحدة بعينها (لو المستخدم غلط وسجلها بالغلط). */
+    suspend fun deleteTransaction(transactionId: String) {
+        transactionDao.deleteTransactionById(transactionId)
+    }
+
+    /** حذف كل عمليات عميل معيّن - تُستخدم عند حذف العميل نفسه (تنظيف تبعي). */
+    suspend fun deleteTransactionsForCustomer(customerId: String) {
+        transactionDao.deleteTransactionsByCustomerId(customerId)
+    }
+
+    /** تعديل منتج/مبلغ عملية موجودة (لو المستخدم غلط بالتسجيل وبدو يصحح بدل ما يحذف ويعيد). */
+    suspend fun updateTransaction(transactionId: String, product: String?, amount: Double) {
+        transactionDao.updateTransaction(transactionId, product, amount)
+    }
+
+    /** إدخال عملية جاهزة بنفس الـ id والتاريخ الأصلي - تُستخدم فقط عند استعادة نسخة احتياطية. */
+    suspend fun insertTransactionDirect(transaction: Transaction) {
+        transactionDao.insertTransaction(transaction)
+    }
 }

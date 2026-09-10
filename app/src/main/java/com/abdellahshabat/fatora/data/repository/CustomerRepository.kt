@@ -40,4 +40,14 @@ class CustomerRepository(
     suspend fun getAllCustomers(): List<Customer> {
         return customerDao.getAllCustomers()
     }
+
+    /** حذف العميل نفسه - لازم يترافق مع حذف عملياته من TransactionRepository برة هالكلاس. */
+    suspend fun deleteCustomer(customerId: String) {
+        customerDao.deleteCustomerById(customerId)
+    }
+
+    /** إدخال عميل جاهز بنفس الـ id والتاريخ الأصلي - تُستخدم فقط عند استعادة نسخة احتياطية. */
+    suspend fun insertCustomerDirect(customer: Customer) {
+        customerDao.insertCustomer(customer)
+    }
 }

@@ -3,8 +3,8 @@ package com.abdellahshabat.fatora.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.abdellahshabat.fatora.screen1.InvoiceCardUi
-import com.abdellahshabat.fatora.screen1.InvoicesUiState
+import com.abdellahshabat.fatora.InvoiceCardUi
+import com.abdellahshabat.fatora.InvoicesUiState
 import com.abdellahshabat.fatora.data.database.entity.TransactionType
 import com.abdellahshabat.fatora.data.repository.CustomerRepository
 import com.abdellahshabat.fatora.data.repository.TransactionRepository
@@ -35,6 +35,22 @@ class InvoicesViewModel(
         loadInvoices()
     }
 
+    /** يحذف عملية واحدة ويعيد تحميل القائمة فوراً عشان تختفي من الشاشة مباشرة. */
+    fun deleteInvoice(transactionId: String) {
+        viewModelScope.launch {
+            transactionRepository.deleteTransaction(transactionId)
+            loadInvoices()
+        }
+    }
+
+    /** يعدّل منتج/مبلغ عملية موجودة ويعيد تحميل القائمة عشان الرصيد التراكمي يتحدث فوراً. */
+    fun updateInvoice(transactionId: String, product: String?, amount: Double) {
+        viewModelScope.launch {
+            transactionRepository.updateTransaction(transactionId, product, amount)
+            loadInvoices()
+        }
+    }
+
     fun loadInvoices() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -62,9 +78,11 @@ class InvoicesViewModel(
                 .sortedByDescending { it.createdAt }
                 .map { transaction ->
                     InvoiceCardUi(
+                        id = transaction.id,
                         customerName = customerNameById[transaction.customerId] ?: "عميل محذوف",
                         label = transaction.product
                             ?: if (transaction.type == TransactionType.PAYMENT) "دفعة" else "-",
+                        rawProduct = transaction.product,
                         amount = transaction.amount,
                         isPositive = transaction.type == TransactionType.PAYMENT,
                         dateLabel = formatRelativeDayLabel(transaction.createdAt),

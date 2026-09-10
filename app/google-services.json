@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "62470922194",
+    "project_id": "unimate-ai-fd86d",
+    "storage_bucket": "unimate-ai-fd86d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62470922194:android:da87eec8c2fa74bbe8320b",
+        "android_client_info": {
+          "package_name": "com.abdellahshabat.fatora"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "62470922194-1igvhs3866kgbl0144c5mpf85plkarqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQBsZvHKME0usPU1-ZVhVKMN-ZZZwKLJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "62470922194-1igvhs3866kgbl0144c5mpf85plkarqq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62470922194:android:07b8d02383fff444e8320b",
+        "android_client_info": {
+          "package_name": "com.abdellahshabat.unimate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "62470922194-1igvhs3866kgbl0144c5mpf85plkarqq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQBsZvHKME0usPU1-ZVhVKMN-ZZZwKLJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "62470922194-1igvhs3866kgbl0144c5mpf85plkarqq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

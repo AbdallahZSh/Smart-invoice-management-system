@@ -1,4 +1,4 @@
-package com.abdellahshabat.fatora.screen1
+package com.abdellahshabat.fatora
 
 /**
  * حالة شاشة قائمة الفواتير. كل بطاقة تمثل عملية واحدة، لكن معها
@@ -12,8 +12,10 @@ data class InvoicesUiState(
 )
 
 data class InvoiceCardUi(
+    val id: String,              // معرف العملية الحقيقي - لازم للحذف والتعديل
     val customerName: String,
-    val label: String,           // اسم المنتج، أو "دفعة" لو النوع PAYMENT
+    val label: String,           // اسم المنتج، أو "دفعة" لو النوع PAYMENT (للعرض بس)
+    val rawProduct: String?,     // القيمة الحقيقية للمنتج (null لو دفعة أو بدون منتج) - للتعديل
     val amount: Double,
     val isPositive: Boolean,     // true = دفعة (تقلل الدين)، false = دين جديد
     val dateLabel: String,       // "اليوم، 5:41 م" / "أمس، ..." / تاريخ كامل

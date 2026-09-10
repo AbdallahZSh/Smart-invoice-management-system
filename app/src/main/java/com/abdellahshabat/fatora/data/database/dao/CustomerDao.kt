@@ -22,4 +22,7 @@ interface CustomerDao {
 
     @Query("SELECT * FROM customers ORDER BY createdAt DESC")
     suspend fun getAllCustomers(): List<Customer>
+
+    @Query("DELETE FROM customers WHERE id = :id")
+    suspend fun deleteCustomerById(id: String)
 }
