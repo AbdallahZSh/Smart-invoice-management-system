@@ -15,16 +15,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.abdellahshabat.fatora.AccountSecurityScreen
 import com.abdellahshabat.fatora.AddDebtScreen
 import com.abdellahshabat.fatora.AddPaymentScreen
 import com.abdellahshabat.fatora.AppearanceScreen
 import com.abdellahshabat.fatora.BackupScreen
 import com.abdellahshabat.fatora.ClarificationScreen
 import com.abdellahshabat.fatora.ComingSoonScreen
+import com.abdellahshabat.fatora.DataInformationScreen
 import com.abdellahshabat.fatora.HelpFeedbackScreen
 import com.abdellahshabat.fatora.HomeScreen
 import com.abdellahshabat.fatora.InvoicesScreen
 import com.abdellahshabat.fatora.ListsScreen
+import com.abdellahshabat.fatora.PrivacyPolicyScreen
+import com.abdellahshabat.fatora.PrivacyScreen
 import com.abdellahshabat.fatora.QueryResponseScreen
 import com.abdellahshabat.fatora.SettingsScreen
 import com.abdellahshabat.fatora.StorageDataScreen
@@ -71,6 +75,9 @@ object FatoraRoutes {
     const val HELP = "help"
     const val ACCOUNT_STUB = "account_stub"
     const val PRIVACY_STUB = "privacy_stub"
+    const val DATA_INFORMATION = "data_information"
+    const val ACCOUNT_SECURITY = "account_security"
+    const val PRIVACY_POLICY = "privacy_policy"
     const val NOTIFICATIONS_STUB = "notifications_stub"
     const val LANGUAGE_STUB = "language_stub"
 
@@ -445,10 +452,56 @@ fun FatoraNavGraph(
         }
 
         composable(FatoraRoutes.PRIVACY_STUB) {
-            ComingSoonScreen(
-                title = "الخصوصية",
-                explanation = "ميزة حجب عميل بتحتاج تعديل بجدول العملاء بقاعدة البيانات - رح نضيفها بعناية بمرة جاية.",
-                onBackClick = { navController.popBackStack() }
+            PrivacyScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+
+                onChangePassword = {
+                    // سنضيف شاشة تغيير كلمة المرور في الخطوة القادمة
+                },
+
+                onAccountSecurity = {
+                    navController.navigate(FatoraRoutes.ACCOUNT_SECURITY)
+                },
+
+                onPrivacyPolicy = {
+                    navController.navigate(FatoraRoutes.PRIVACY_POLICY)
+                },
+
+                onDeleteAccount = {
+                    // سنضيف حذف الحساب لاحقاً
+                },
+
+                onDataInformation = {
+                    navController.navigate(FatoraRoutes.DATA_INFORMATION)
+                }
+            )
+        }
+        composable(FatoraRoutes.DATA_INFORMATION) {
+            DataInformationScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(FatoraRoutes.ACCOUNT_SECURITY) {
+            AccountSecurityScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onChangePasswordClick = {
+                    // سنفعله بعد اكتمال Authentication
+                }
+            )
+        }
+
+        composable(FatoraRoutes.PRIVACY_POLICY) {
+            PrivacyPolicyScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
             )
         }
 
